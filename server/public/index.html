@@ -19,16 +19,23 @@
         <a href="#">upgrade your browser</a> to improve your experience.
       </p>
     <![endif]-->
-    <h1>See your Spotify song timeline!</h1>
-    <a href="/login" class="btn btn-primary">Log in with Spotify</a>
+    <a href="/"><h1>See your Spotify song timeline!</h1></a>
+    <a href="/login"><button id="login-button">Log in with Spotify</button></a>
     <button type="button" id="get-data">Get Data</button>
     <pre id="data-placeholder"></pre>
-    <canvas id="chart" width="400" height="400"></canvas>
+    <div
+      class="chart-container"
+      style="position: relative; height: 40vh; width: 80vw"
+    >
+      <canvas id="chart" width="400" height="400"></canvas>
+    </div>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.bundle.js"
       integrity="sha512-zO8oeHCxetPn1Hd9PdDleg5Tw1bAaP0YmNvPY8CwcRyUk7d7/+nyElmFrB6f7vg4f7Fv4sui1mcep8RIEShczg=="
       crossorigin="anonymous"
     ></script>
-    <script type="text/javascript" src="./app.js" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/1.25.0/luxon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@0.2.1"></script>
+    <script type="text/javascript" src="./scripts.js" async defer></script>
   </body>
 </html>
