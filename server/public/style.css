@@ -5,3 +5,7 @@ html {
 h1 {
   text-align: center;
 }
+
+pre {
+  overflow: scroll;
+}
