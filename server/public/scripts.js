@@ -13,7 +13,7 @@ function getHashParams() {
   return hashParams;
 }
 
-function createChart(data, label, labels) {
+function createChart(data, label = "Data", labels = []) {
   const ctx = document.getElementById("chart").getContext("2d");
   const chart = new Chart(ctx, {
     type: "line",
@@ -23,6 +23,7 @@ function createChart(data, label, labels) {
         {
           label: label,
           data: data,
+          backgroundColor: "#4cdf53",
         },
       ],
     },
@@ -34,6 +35,7 @@ function createChart(data, label, labels) {
       },
     },
   });
+  return chart;
 }
 
 const params = getHashParams();
@@ -59,7 +61,19 @@ function updateToken() {
   });
 }
 
-function grabData() {
+function setData(chart, data, label, labels) {
+  chart.data.labels = labels;
+  chart.data.datasets = [
+    {
+      label,
+      data,
+      backgroundColor: "#4cdf53",
+    },
+  ];
+  chart.update();
+}
+
+const grabData = (chart) => () => {
   fetch("https://api.spotify.com/v1/me/tracks?limit=50", {
     method: "GET",
     headers: {
@@ -86,13 +100,18 @@ function grabData() {
         freqMap.set(key, ++count);
       });
 
-      document.querySelector("#data-placeholder").innerHTML = dates.join("\n");
-      createChart([...freqMap.values()], "Save Date", [...freqMap.keys()]);
+      setData(chart, [...freqMap.values()], "Library Save Date", [
+        ...freqMap.keys(),
+      ]);
     })
     .catch(console.log);
-}
+};
 
-document.querySelector("#get-data").addEventListener("click", grabData);
+const chart = createChart();
+
+const updateChart = grabData(chart);
+
+document.querySelector("#get-data").addEventListener("click", updateChart);
 
 if (accessToken) {
   document.querySelector("#login-button").remove();

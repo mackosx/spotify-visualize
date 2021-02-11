@@ -6,6 +6,44 @@ h1 {
   text-align: center;
 }
 
+a:hover,
+a:active,
+a {
+  text-decoration: none;
+}
+
+a:visited {
+  color: inherit;
+}
+
 pre {
   overflow: scroll;
+}
+
+.chart-container {
+  position: relative;
+  height: 40vh;
+  width: 80vw;
+}
+
+.flex-container {
+  display: flex;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+button {
+  padding: 1rem 2rem;
+  color: white;
+  background-color: rgb(76, 223, 83);
+  border-radius: 0;
+  border: 0;
+  font-family: inherit;
+  text-transform: uppercase;
+}
+
+.flex-column {
+  flex-direction: column;
 }
