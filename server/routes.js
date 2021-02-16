@@ -74,23 +74,7 @@ router.get("/callback", (req, response) => {
         const access_token = data.access_token;
         const refresh_token = data.refresh_token;
 
-        const options = {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + access_token,
-            "Content-Type": "application/json",
-          },
-        };
-
-        // use the access token to access the Spotify Web API
-        fetch("https://api.spotify.com/v1/me", options)
-          .then((res) => res.json())
-          .then((data) => {
-            console.log(data);
-          })
-          .catch((err) => console.log(err));
-
-        // we can also pass the token to the browser to make requests from there
+        // pass the token to the browser to make requests from there
         response.redirect(
           "/#" +
             querystring.stringify({

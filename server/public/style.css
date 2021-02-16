@@ -1,6 +1,24 @@
-html {
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+* {
+  box-sizing: border-box;
 }
+
+html {
+  font-family: "Nunito Sans", sans-serif;
+}
+
+html,
+body {
+  height: 100%;
+  background-color: #f3eec3;
+}
+
+body {
+  padding: 1rem;
+}
+
+/* body > * {
+  margin: 1rem;
+} */
 
 h1 {
   text-align: center;
@@ -10,6 +28,11 @@ a:hover,
 a:active,
 a {
   text-decoration: none;
+}
+
+a:hover,
+button:hover {
+  cursor: pointer;
 }
 
 a:visited {
@@ -22,8 +45,10 @@ pre {
 
 .chart-container {
   position: relative;
-  height: 40vh;
-  width: 80vw;
+  height: 100%;
+  width: 100%;
+  max-width: 50vw;
+  display: none;
 }
 
 .flex-container {
@@ -37,13 +62,32 @@ pre {
 button {
   padding: 1rem 2rem;
   color: white;
-  background-color: rgb(76, 223, 83);
+  background-color: #88527f;
   border-radius: 0;
   border: 0;
   font-family: inherit;
   text-transform: uppercase;
+  margin: 1rem;
 }
 
 .flex-column {
   flex-direction: column;
+}
+
+.full-height {
+  height: 100%;
+}
+
+.fill-rest {
+  flex: 1;
+}
+
+.p-relative {
+  position: relative;
+}
+
+.card {
+  padding: 1rem;
+  border-radius: 5px;
+  background-color: white;
 }

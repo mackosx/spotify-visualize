@@ -10,7 +10,13 @@
     <title>Spotify Visualize</title>
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="./normalize.css" />
     <link rel="stylesheet" href="./style.css" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <!--[if lt IE 7]>
@@ -19,14 +25,21 @@
         <a href="#">upgrade your browser</a> to improve your experience.
       </p>
     <![endif]-->
-    <a href="/"><h1>See your Spotify song timeline!</h1></a>
-    <a href="/login"><button id="login-button">Log in with Spotify</button></a>
-    <div class="flex-container justify-center">
-      <button type="button" id="get-data">Get Data</button>
-    </div>
-    <div class="flex-container justify-center">
-      <div class="chart-container">
-        <canvas id="chart" width="400" height="400"></canvas>
+    <div class="flex-container flex-column full-height">
+      <div>
+        <a href="/"><h1>See your Spotify song timeline!</h1></a>
+      </div>
+      <div class="flex-container justify-center">
+        <a href="/login"
+          ><button id="login-button">Log in with Spotify</button></a
+        >
+        <button type="button" id="get-data">Get Data</button>
+        <button type="button" id="by-genre">By Genre</button>
+      </div>
+      <div class="flex-container justify-center fill-rest p-relative">
+        <div class="chart-container card">
+          <canvas id="chart" width="400" height="400"></canvas>
+        </div>
       </div>
     </div>
     <script
