@@ -1,6 +1,6 @@
 "use strict";
 Chart.defaults.global.defaultFontFamily = "Nunito Sans";
-let songData;
+let songData = [];
 /**
  * Obtains parameters from the hash of the URL
  * @return Object
@@ -129,25 +129,40 @@ const mapFrequencies = (songs) => {
   return freqMap;
 };
 
-const mapGenres = (songs) => {
-  const dates = songs.map((song) => song.added_at);
+/**
+ * Returns the frequency of each genre
+ * @param {Array<object>} songs Array of spotify song objects
+ */
+const mapGenres = async (songs) => {
+  const albumIds = songs.map((song) => song.track.album.id);
+  const genres = [];
+  const albums = await getAlbums(albumIds.slice(0, 20));
+  albums.forEach((album) => genres.concat(album.genres));
   const freqMap = new Map();
 
-  // dates.forEach((time) => {
-  //   const date = new Date(time);
-  //   const dateKey = date.toLocaleString("en-us", {
-  //     // day: "2-digit",
-  //     month: "short",
-  //     year: "2-digit",
-  //   });
-  //   let count = freqMap.get(dateKey) || 0;
-  //   freqMap.set(dateKey, ++count);
-  // });
+  genres.forEach((genre) => {
+    let count = freqMap.get(dateKey) || 0;
+    freqMap.set(dateKey, ++count);
+  });
   return freqMap;
 };
 
+/**
+ * Returns an array of album objects.
+ * @param {Array<string>} ids Array of album id strings to get.
+ */
+const getAlbums = async (ids) => {
+  if (ids.length > 20) {
+    throw new Error("Too many albums.");
+  }
+  const albumsResponse = await grabData(
+    `https://api.spotify.com/v1/albums?ids=${ids.join(",")}`
+  );
+  return albumsResponse.albums;
+};
+
 async function getDataListener(event) {
-  songData = (await getSongData()).reverse();
+  const songData = (await getSongData()).reverse();
   const mappedSongData = mapFrequencies(songData);
   document.querySelector(".chart-container").style.display = "block";
   const chartElement = document.getElementById("chart");
@@ -157,11 +172,11 @@ async function getDataListener(event) {
 }
 
 async function byGenreListener(event) {
-  songData = (await getSongData()).reverse();
-  const mappedSongData = mapGenres(songData);
+  const songData = (await getSongData()).reverse();
+  const mappedSongData = await mapGenres(songData);
   document.querySelector(".chart-container").style.display = "block";
   const chartElement = document.getElementById("chart");
-  createChart(chartElement, [...mappedSongData.values()], "# of songs saved", [
+  createChart(chartElement, [...mappedSongData.values()], "Genre", [
     ...mappedSongData.keys(),
   ]);
 }
@@ -175,15 +190,15 @@ document.querySelector("#get-data").addEventListener("click", getDataListener);
 document.querySelector("#by-genre").addEventListener("click", byGenreListener);
 
 async function getSongData() {
-  if (songData) {
+  if (songData.length > 0) {
     return songData;
   }
   const songDataPromises = [];
   const limit = 50;
-  const offset = 0;
+  let offset = 0;
   for (let i = 0; i < 3; i++) {
     offset += limit;
-    songDataPromises.append(
+    songDataPromises.push(
       grabData(
         `https://api.spotify.com/v1/me/tracks?limit=${limit}&offset=${offset}`
       )
@@ -191,7 +206,7 @@ async function getSongData() {
   }
   Promise.all(songDataPromises).then((songSets) => {
     songSets.forEach((songSet) => {
-      songData.append(...songSet);
+      songData = songData.concat(songSet.items);
     });
   });
   return songData;
@@ -204,3 +219,6 @@ if (accessToken) {
 } else {
   document.querySelector("#get-data").style.display = "none";
 }
+
+// Ideas
+// Audio features panel
