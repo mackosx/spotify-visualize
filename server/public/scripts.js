@@ -1,9 +1,10 @@
 "use strict";
 Chart.defaults.global.defaultFontFamily = "Nunito Sans";
 let songData = [];
+let chart;
 /**
- * Obtains parameters from the hash of the URL
- * @return Object
+ * Obtains parameters from the hash of the URL.
+ * @return {object} Dictionary of hash params to the values.
  */
 function getHashParams() {
   var hashParams = {};
@@ -53,12 +54,13 @@ function createChart(element, data, title = "Data", labels = []) {
 }
 
 function setChartData(chart, data, title, labels) {
+  chartContainer.style.display = "block";
   chart.data.labels = labels;
   chart.data.datasets = [
     {
       label: title,
       data,
-      backgroundColor: "#4cdf53",
+      backgroundColor: "#17C3B2",
     },
   ];
   chart.update();
@@ -72,20 +74,18 @@ const grabData = (url) => {
     headers: {
       Authorization: "Bearer " + accessToken,
     },
-  })
-    .then((response) => {
-      if (response.status === 200) {
-        return response.json();
-      } else if (response.status === 401) {
-        response.json().then(async (data) => {
-          if (data.error.message === "The access token expired") {
-            await refreshTokens();
-            return grabData(url);
-          }
-        });
-      }
-    })
-    .catch(console.log);
+  }).then((response) => {
+    if (response.status === 200) {
+      return response.json();
+    } else if (response.status === 401) {
+      response.json().then(async (data) => {
+        if (data.error.message === "The access token expired") {
+          await refreshTokens();
+          return grabData(url);
+        }
+      });
+    }
+  });
 };
 
 function refreshTokens() {
@@ -102,27 +102,50 @@ function refreshTokens() {
     });
 }
 
-const mapFrequencies = (songs) => {
+/**
+ * Returns a map of dates to occurences of saves.
+ * @param {Array<object>} songs Spotify songs objects.
+ * @param {"month"| "weekday" | "year"} grouping Level of frequency grouping.
+ */
+const mapFrequencies = (songs, grouping = "month") => {
   const dates = songs.map((song) => song.added_at);
   const freqMap = new Map();
+  const weekDayKeys = {
+    0: "Sunday",
+    1: "Monday",
+    2: "Tuesday",
+    3: "Wednesday",
+    4: "Thursday",
+    5: "Friday",
+    6: "Saturday",
+  };
+
+  if (grouping === "weekday") {
+    // Set initial counts to 0 so map is sorted
+    Object.values(weekDayKeys).forEach((v) => {
+      freqMap.set(v, 0);
+    });
+  }
 
   dates.forEach((time) => {
     const date = new Date(time);
-    const dateKey = date.toLocaleString("en-us", {
-      // day: "2-digit",
-      month: "short",
-      year: "2-digit",
-    });
-    // const keys = {
-    //   0: "Sunday",
-    //   1: "Monday",
-    //   2: "Tuesday",
-    //   3: "Wednesday",
-    //   4: "Thursday",
-    //   5: "Friday",
-    //   6: "Saturday",
-    // };
-    // const dateKey = keys[date.getDay()];
+    let dateKey;
+    switch (grouping) {
+      case "weekday":
+        dateKey = weekDayKeys[date.getDay()];
+        break;
+      case "month":
+        dateKey = date.toLocaleString("en-us", {
+          month: "short",
+          year: "2-digit",
+        });
+      case "year":
+        dateKey = date.toLocaleString("en-us", {
+          year: "numeric",
+        });
+        break;
+    }
+
     let count = freqMap.get(dateKey) || 0;
     freqMap.set(dateKey, ++count);
   });
@@ -130,8 +153,8 @@ const mapFrequencies = (songs) => {
 };
 
 /**
- * Returns the frequency of each genre
- * @param {Array<object>} songs Array of spotify song objects
+ * Returns the frequency of each genre.
+ * @param {Array<object>} songs Array of spotify song objects.
  */
 const mapGenres = async (songs) => {
   const albumIds = songs.map((song) => song.track.album.id);
@@ -161,12 +184,26 @@ const getAlbums = async (ids) => {
   return albumsResponse.albums;
 };
 
-async function getDataListener(event) {
+async function byWeekDayListener(event) {
   const songData = (await getSongData()).reverse();
-  const mappedSongData = mapFrequencies(songData);
-  document.querySelector(".chart-container").style.display = "block";
-  const chartElement = document.getElementById("chart");
-  createChart(chartElement, [...mappedSongData.values()], "# of songs saved", [
+  const mappedSongData = mapFrequencies(songData, "weekday");
+  setChartData(chart, [...mappedSongData.values()], "# of songs saved", [
+    ...mappedSongData.keys(),
+  ]);
+}
+
+async function byMonthListener(event) {
+  const songData = (await getSongData()).reverse();
+  const mappedSongData = mapFrequencies(songData, "month");
+  setChartData(chart, [...mappedSongData.values()], "# of songs saved", [
+    ...mappedSongData.keys(),
+  ]);
+}
+
+async function byYearListener(event) {
+  const songData = (await getSongData()).reverse();
+  const mappedSongData = mapFrequencies(songData, "year");
+  setChartData(chart, [...mappedSongData.values()], "# of songs saved", [
     ...mappedSongData.keys(),
   ]);
 }
@@ -174,9 +211,8 @@ async function getDataListener(event) {
 async function byGenreListener(event) {
   const songData = (await getSongData()).reverse();
   const mappedSongData = await mapGenres(songData);
-  document.querySelector(".chart-container").style.display = "block";
   const chartElement = document.getElementById("chart");
-  createChart(chartElement, [...mappedSongData.values()], "Genre", [
+  setChartData(chart, [...mappedSongData.values()], "Genre", [
     ...mappedSongData.keys(),
   ]);
 }
@@ -186,33 +222,49 @@ async function byGenreListener(event) {
 
 // setChartData(chart, [...freqMap.values()], "Library Save Date", [...freqMap.keys()]);
 
-document.querySelector("#get-data").addEventListener("click", getDataListener);
 document.querySelector("#by-genre").addEventListener("click", byGenreListener);
+document.querySelector("#by-day").addEventListener("click", byWeekDayListener);
+document.querySelector("#by-month").addEventListener("click", byMonthListener);
+document.querySelector("#by-year").addEventListener("click", byYearListener);
 
 async function getSongData() {
   if (songData.length > 0) {
     return songData;
   }
-  const songDataPromises = [];
-  const limit = 50;
-  let offset = 0;
-  for (let i = 0; i < 3; i++) {
-    songDataPromises.push(
-      grabData(
-        `https://api.spotify.com/v1/me/tracks?limit=${limit}&offset=${offset}`
-      )
-    );
-    offset += limit;
-  }
-  Promise.all(songDataPromises).then((songSets) => {
-    songSets.forEach((songSet) => {
-      songData = songData.concat(songSet.items);
+
+  const initialCall = grabData(`https://api.spotify.com/v1/me/tracks`)
+    .then((data) => {
+      const totalSongs = data.total;
+      const limit = 50;
+
+      const songDataPromises = [];
+      let offset = 0;
+      const calls = Math.ceil(totalSongs / limit);
+      for (let i = 0; i < calls; i++) {
+        songDataPromises.push(
+          grabData(
+            `https://api.spotify.com/v1/me/tracks?limit=${limit}&offset=${offset}`
+          )
+        );
+        offset += limit;
+      }
+      Promise.all(songDataPromises).then((songSets) => {
+        songSets.forEach((songSet) => {
+          songData = songData.concat(songSet.items);
+        });
+      });
+    })
+    .catch((err) => {
+      console.log("Couldnt get all song data");
     });
-  });
   return songData;
 }
 
+// Cache song data on load
 getSongData();
+const chartContainer = document.querySelector(".chart-container");
+const chartElement = document.getElementById("chart");
+chart = createChart(chartElement, {}, "", []);
 
 if (accessToken) {
   document.querySelector("#login-button").style.display = "none";
