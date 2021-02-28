@@ -197,12 +197,12 @@ async function getSongData() {
   const limit = 50;
   let offset = 0;
   for (let i = 0; i < 3; i++) {
-    offset += limit;
     songDataPromises.push(
       grabData(
         `https://api.spotify.com/v1/me/tracks?limit=${limit}&offset=${offset}`
       )
     );
+    offset += limit;
   }
   Promise.all(songDataPromises).then((songSets) => {
     songSets.forEach((songSet) => {
