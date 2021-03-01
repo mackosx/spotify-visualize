@@ -2,6 +2,7 @@
 Chart.defaults.global.defaultFontFamily = "Nunito Sans";
 let songData = [];
 let chart;
+let chartContainer;
 /**
  * Obtains parameters from the hash of the URL.
  * @return {object} Dictionary of hash params to the values.
@@ -146,6 +147,7 @@ const mapFrequencies = (songs, grouping = "month") => {
           month: "short",
           year: "2-digit",
         });
+        break;
       case "year":
         dateKey = date.toLocaleString("en-us", {
           year: "numeric",
@@ -280,15 +282,15 @@ async function getSongData() {
 }
 
 // Cache song data on load
-getSongData();
-const chartContainer = document.querySelector(".chart-container");
-const chartElement = document.getElementById("chart");
-chart = createChart(chartElement, {}, "", []);
 
 if (accessToken) {
-  document.querySelector("#login-button").style.display = "none";
+  getSongData();
+  chartContainer = document.querySelector(".chart-container");
+  const chartElement = document.getElementById("chart");
+  chart = createChart(chartElement, {}, "", []);
+  document.querySelector("#button-area").style.display = "block";
 } else {
-  document.querySelector("#get-data").style.display = "none";
+  document.querySelector("#login-button").style.display = "block";
 }
 
 // Ideas

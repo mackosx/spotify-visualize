@@ -31,14 +31,17 @@
       </div>
       <div class="flex-container justify-center">
         <a href="/login"
-          ><button id="login-button">Log in with Spotify</button></a
+          ><button id="login-button" style="display: none">
+            Log in with Spotify
+          </button></a
         >
-        <button type="button" id="by-weekday">By Weekday</button>
-        <button type="button" id="by-day">By Day</button>
-        <button type="button" id="by-month">By Month</button>
-        <button type="button" id="by-year">By Year</button>
-
-        <button type="button" id="by-genre">By Genre</button>
+        <div id="button-area" style="display: none">
+          <button type="button" id="by-weekday">By Weekday</button>
+          <button type="button" id="by-day">By Day</button>
+          <button type="button" id="by-month">By Month</button>
+          <button type="button" id="by-year">By Year</button>
+          <button type="button" id="by-genre">By Genre</button>
+        </div>
       </div>
       <div class="flex-container justify-center fill-rest p-relative">
         <div class="chart-container card">
