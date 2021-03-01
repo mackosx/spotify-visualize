@@ -105,7 +105,7 @@ function refreshTokens() {
 /**
  * Returns a map of dates to occurences of saves.
  * @param {Array<object>} songs Spotify songs objects.
- * @param {"month"| "weekday" | "year"} grouping Level of frequency grouping.
+ * @param {"month"| "weekday" | "year" | "day"} grouping Level of frequency grouping.
  */
 const mapFrequencies = (songs, grouping = "month") => {
   const dates = songs.map((song) => song.added_at);
@@ -133,6 +133,13 @@ const mapFrequencies = (songs, grouping = "month") => {
     switch (grouping) {
       case "weekday":
         dateKey = weekDayKeys[date.getDay()];
+        break;
+      case "day":
+        dateKey = date.toLocaleString("en-us", {
+          day: "numeric",
+          month: "short",
+          year: "2-digit",
+        });
         break;
       case "month":
         dateKey = date.toLocaleString("en-us", {
@@ -192,6 +199,14 @@ async function byWeekDayListener(event) {
   ]);
 }
 
+async function byDayListener(event) {
+  const songData = (await getSongData()).reverse();
+  const mappedSongData = mapFrequencies(songData, "day");
+  setChartData(chart, [...mappedSongData.values()], "# of songs saved", [
+    ...mappedSongData.keys(),
+  ]);
+}
+
 async function byMonthListener(event) {
   const songData = (await getSongData()).reverse();
   const mappedSongData = mapFrequencies(songData, "month");
@@ -223,8 +238,12 @@ async function byGenreListener(event) {
 // setChartData(chart, [...freqMap.values()], "Library Save Date", [...freqMap.keys()]);
 
 document.querySelector("#by-genre").addEventListener("click", byGenreListener);
-document.querySelector("#by-day").addEventListener("click", byWeekDayListener);
+document
+  .querySelector("#by-weekday")
+  .addEventListener("click", byWeekDayListener);
+document.querySelector("#by-day").addEventListener("click", byDayListener);
 document.querySelector("#by-month").addEventListener("click", byMonthListener);
+document.querySelector("#by-year").addEventListener("click", byYearListener);
 document.querySelector("#by-year").addEventListener("click", byYearListener);
 
 async function getSongData() {
