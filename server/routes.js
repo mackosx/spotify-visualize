@@ -1,6 +1,5 @@
 const express = require("express");
 const fetch = require("node-fetch");
-const querystring = require("querystring");
 const { URLSearchParams } = require("url");
 const { generateRandomString } = require("./helpers");
 const { client_id, client_secret, redirect_uri } = require("./constants");
@@ -14,17 +13,14 @@ router.get("/login", function (req, res) {
   res.cookie(stateKey, state);
 
   // your application requests authorization
-  const scope = "user-read-private user-read-email user-library-read";
-  res.redirect(
-    "https://accounts.spotify.com/authorize?" +
-      querystring.stringify({
-        response_type: "code",
-        client_id: client_id,
-        scope: scope,
-        redirect_uri: redirect_uri,
-        state: state,
-      })
-  );
+  const params = new URLSearchParams({
+    response_type: "code",
+    client_id: client_id,
+    scope: "user-read-private user-read-email user-library-read",
+    redirect_uri: redirect_uri,
+    state: state,
+  });
+  res.redirect("https://accounts.spotify.com/authorize?" + params.toString());
 });
 
 router.get("/callback", (req, response) => {
@@ -35,25 +31,24 @@ router.get("/callback", (req, response) => {
   const state = req.query.state || null;
   const storedState = req.cookies ? req.cookies[stateKey] : null;
   if (state === null || state !== storedState) {
-    response.redirect(
-      "/#" +
-        querystring.stringify({
-          error: "state_mismatch",
-        })
-    );
+    const params = new URLSearchParams({
+      error: "state_mismatch",
+    });
+    response.redirect("/#" + params.toString());
   } else {
     response.clearCookie(stateKey);
-    const form = new URLSearchParams();
-    form.append("code", code);
-    form.append("redirect_uri", redirect_uri);
-    form.append("grant_type", "authorization_code");
+    const form = new URLSearchParams({
+      code: code,
+      redirect_uri: redirect_uri,
+      grant_type: "authorization_code",
+    });
     const authOptions = {
       method: "POST",
       body: form,
       headers: {
         Authorization:
           "Basic " +
-          new Buffer.from(client_id + ":" + client_secret).toString("base64"),
+          new Buffer.from(`${client_id}:${client_secret}`).toString("base64"),
       },
     };
 
@@ -62,12 +57,10 @@ router.get("/callback", (req, response) => {
         if (res.status === 200) {
           return res.json();
         } else {
-          response.redirect(
-            "/#" +
-              querystring.stringify({
-                error: "invalid_token",
-              })
-          );
+          const params = new URLSearchParams({
+            error: "invalid_token",
+          });
+          response.redirect("/#" + params.toString());
         }
       })
       .then((data) => {
@@ -75,13 +68,11 @@ router.get("/callback", (req, response) => {
         const refresh_token = data.refresh_token;
 
         // pass the token to the browser to make requests from there
-        response.redirect(
-          "/#" +
-            querystring.stringify({
-              access_token: access_token,
-              refresh_token: refresh_token,
-            })
-        );
+        const params = new URLSearchParams({
+          access_token: access_token,
+          refresh_token: refresh_token,
+        });
+        response.redirect("/#" + params.toString());
       })
       .catch((err) => console.log(err));
   }
@@ -90,15 +81,16 @@ router.get("/callback", (req, response) => {
 router.get("/refresh_token", (req, response) => {
   // requesting access token from refresh token
   const refresh_token = req.query.refresh_token;
-  const form = new URLSearchParams();
-  form.append("grant_type", "refresh_token");
-  form.append("refresh_token", refresh_token);
+  const form = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: refresh_token,
+  });
   const authOptions = {
     method: "POST",
     headers: {
       Authorization:
         "Basic " +
-        new Buffer.from(client_id + ":" + client_secret).toString("base64"),
+        new Buffer.from(`${client_id}:${client_secret}`).toString("base64"),
     },
     body: form,
   };

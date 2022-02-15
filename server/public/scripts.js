@@ -2,6 +2,7 @@
 Chart.defaults.global.defaultFontFamily = "Nunito Sans";
 let songData = [];
 let chart;
+let chartElement;
 let chartContainer;
 /**
  * Obtains parameters from the hash of the URL.
@@ -28,7 +29,8 @@ if (error) {
   alert("There was an error during the authentication");
 }
 
-function createChart(element, data, title = "Data", labels = []) {
+function createBarChart(element, data, title = "Data", labels = []) {
+  chartContainer.style.display = "block";
   const ctx = element.getContext("2d");
   const chart = new Chart(ctx, {
     type: "bar",
@@ -54,17 +56,26 @@ function createChart(element, data, title = "Data", labels = []) {
   return chart;
 }
 
-function setChartData(chart, data, title, labels) {
+function createDoughnutChart(element, data, title = "Data", labels = []) {
   chartContainer.style.display = "block";
-  chart.data.labels = labels;
-  chart.data.datasets = [
-    {
-      label: title,
-      data,
-      backgroundColor: "#17C3B2",
+  const ctx = element.getContext("2d");
+  const colors = data.map(() => {
+    return "#" + Math.floor(Math.random() * 16777215).toString(16);
+  });
+  const chart = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: title,
+          data: data,
+          backgroundColor: colors,
+        },
+      ],
     },
-  ];
-  chart.update();
+  });
+  return chart;
 }
 
 const grabData = (url) => {
@@ -90,7 +101,7 @@ const grabData = (url) => {
 };
 
 function refreshTokens() {
-  fetch(`/refresh_token?refresh_token=${refreshToken}`, {
+  return fetch(`/refresh_token?refresh_token=${refreshToken}`, {
     method: "GET",
   })
     .then((response) => {
@@ -193,67 +204,67 @@ const getAlbums = async (ids) => {
   return albumsResponse.albums;
 };
 
-async function byWeekDayListener(event) {
+const timeListener = (frequency) => async (event) => {
   const songData = (await getSongData()).reverse();
-  const mappedSongData = mapFrequencies(songData, "weekday");
-  setChartData(chart, [...mappedSongData.values()], "# of songs saved", [
-    ...mappedSongData.keys(),
-  ]);
-}
+  const mappedSongData = mapFrequencies(songData, frequency);
+  if (chart) {
+    chart.destroy();
+  }
+  chart = createBarChart(
+    chartElement,
+    [...mappedSongData.values()],
+    "# of songs saved",
+    [...mappedSongData.keys()]
+  );
+};
 
-async function byDayListener(event) {
+const weekDayListener = (frequency) => async (event) => {
   const songData = (await getSongData()).reverse();
-  const mappedSongData = mapFrequencies(songData, "day");
-  setChartData(chart, [...mappedSongData.values()], "# of songs saved", [
-    ...mappedSongData.keys(),
-  ]);
-}
-
-async function byMonthListener(event) {
-  const songData = (await getSongData()).reverse();
-  const mappedSongData = mapFrequencies(songData, "month");
-  setChartData(chart, [...mappedSongData.values()], "# of songs saved", [
-    ...mappedSongData.keys(),
-  ]);
-}
-
-async function byYearListener(event) {
-  const songData = (await getSongData()).reverse();
-  const mappedSongData = mapFrequencies(songData, "year");
-  setChartData(chart, [...mappedSongData.values()], "# of songs saved", [
-    ...mappedSongData.keys(),
-  ]);
-}
+  const mappedSongData = mapFrequencies(songData, frequency);
+  if (chart) {
+    chart.destroy();
+  }
+  chart = createDoughnutChart(
+    chartElement,
+    [...mappedSongData.values()],
+    "# of songs saved",
+    [...mappedSongData.keys()]
+  );
+};
 
 async function byGenreListener(event) {
   const songData = (await getSongData()).reverse();
   const mappedSongData = await mapGenres(songData);
-  const chartElement = document.getElementById("chart");
-  setChartData(chart, [...mappedSongData.values()], "Genre", [
+  if (chart) {
+    chart.destroy();
+  }
+  chart = createBarChart(chartElement, [...mappedSongData.values()], "Genre", [
     ...mappedSongData.keys(),
   ]);
 }
 
 // Move gathering data outside
 // Add buttons to use different mapping functions on the data and call update data
-
-// setChartData(chart, [...freqMap.values()], "Library Save Date", [...freqMap.keys()]);
-
 document.querySelector("#by-genre").addEventListener("click", byGenreListener);
 document
   .querySelector("#by-weekday")
-  .addEventListener("click", byWeekDayListener);
-document.querySelector("#by-day").addEventListener("click", byDayListener);
-document.querySelector("#by-month").addEventListener("click", byMonthListener);
-document.querySelector("#by-year").addEventListener("click", byYearListener);
-document.querySelector("#by-year").addEventListener("click", byYearListener);
+  .addEventListener("click", weekDayListener("weekday"));
+document
+  .querySelector("#by-day")
+  .addEventListener("click", timeListener("day"));
+document
+  .querySelector("#by-month")
+  .addEventListener("click", timeListener("month"));
+document
+  .querySelector("#by-year")
+  .addEventListener("click", timeListener("year"));
 
 async function getSongData() {
   if (songData.length > 0) {
     return songData;
   }
 
-  const initialCall = grabData(`https://api.spotify.com/v1/me/tracks`)
+  grabData(`https://api.spotify.com/v1/me/tracks`)
     .then((data) => {
       const totalSongs = data.total;
       const limit = 50;
@@ -286,12 +297,24 @@ async function getSongData() {
 if (accessToken) {
   getSongData();
   chartContainer = document.querySelector(".chart-container");
-  const chartElement = document.getElementById("chart");
-  chart = createChart(chartElement, {}, "", []);
+  chartElement = document.getElementById("chart");
   document.querySelector("#button-area").style.display = "block";
 } else {
   document.querySelector("#login-button").style.display = "block";
 }
 
+document.querySelectorAll("button.toggle").forEach((button) => {
+  button.addEventListener("click", () => {
+    button.classList.toggle("toggled");
+  });
+});
+
 // Ideas
-// Audio features panel
+// Audio features panel https://developer.spotify.com/documentation/web-api/reference/#/operations/get-several-audio-features
+
+/**
+ * TODO:
+ * 1. Add bundler and split into separate files
+ * 2. Improve styling
+ * 3. Add some simple analysis
+ */

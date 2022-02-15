@@ -27,7 +27,7 @@
     <![endif]-->
     <div class="flex-container flex-column full-height">
       <div>
-        <!-- <a href="/"><h1>See your Spotify song timeline!</h1></a> -->
+        <a href="/"><h1>See your Spotify song timeline!</h1></a>
       </div>
       <div class="flex-container justify-center">
         <a href="/login"
@@ -36,14 +36,14 @@
           </button></a
         >
         <div id="button-area" style="display: none">
-          <button type="button" id="by-weekday">By Weekday</button>
-          <button type="button" id="by-day">By Day</button>
-          <button type="button" id="by-month">By Month</button>
-          <button type="button" id="by-year">By Year</button>
-          <button type="button" id="by-genre">By Genre</button>
+          <button type="button toggle" id="by-weekday">By Weekday</button>
+          <button type="button toggle" id="by-day">By Day</button>
+          <button type="button toggle" id="by-month">By Month</button>
+          <button type="button toggle" id="by-year">By Year</button>
+          <button type="button toggle" id="by-genre">By Genre</button>
         </div>
       </div>
-      <div class="flex-container justify-center fill-rest p-relative">
+      <div class="flex-container justify-center p-relative">
         <div class="chart-container card">
           <canvas id="chart" width="400" height="400"></canvas>
         </div>

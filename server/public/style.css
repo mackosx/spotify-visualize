@@ -45,7 +45,7 @@ pre {
 
 .chart-container {
   position: relative;
-  height: 100%;
+  /* height: 100%; */
   width: 100%;
   max-width: 1000px;
   display: none;
@@ -68,6 +68,14 @@ button {
   font-family: inherit;
   text-transform: uppercase;
   margin: 1rem;
+}
+
+button:hover {
+  background-color: #3e243a;
+}
+
+button.toggle.toggled {
+  background-color: "#17C3B2";
 }
 
 .flex-column {
