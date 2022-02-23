@@ -94,6 +94,10 @@ button.toggle.toggled {
   position: relative;
 }
 
+.text-center {
+  text-align: center;
+}
+
 .card {
   padding: 1rem;
   border-radius: 5px;

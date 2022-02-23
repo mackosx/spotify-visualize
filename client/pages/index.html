@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <![endif]-->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Spotify Visualize</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css"
+    />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!--[if lt IE 7]>
+      <p class="browsehappy">
+        You are using an <strong>outdated</strong> browser. Please
+        <a href="#">upgrade your browser</a> to improve your experience.
+      </p>
+    <![endif]-->
+    <div class="flex-container flex-column full-height">
+      <div class="flex-container flex-column justify-center fill-rest">
+        <div>
+          <a href="/"><h1>See your Spotify song timeline!</h1></a>
+        </div>
+        <div class="flex-container justify-center">
+          <a href="/login">
+            <button id="login-button">Log in with Spotify</button>
+          </a>
+        </div>
+        <div class="flex-container justify-center p-relative">
+          <div class="chart-container card">
+            <canvas id="chart" width="400" height="400"></canvas>
+          </div>
+        </div>
+      </div>
+      <p class="text-center">&#169; 2022 Mackenzie Salloum</p>
+    </div>
+    <script type="text/javascript" src="./bundle.js" async defer></script>
+  </body>
+</html>

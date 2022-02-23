@@ -1,5 +1,6 @@
-"use strict";
-Chart.defaults.global.defaultFontFamily = "Nunito Sans";
+import { Chart } from "chart.js";
+Chart.defaults.font.family = "Nunito Sans";
+
 let songData = [];
 let chart;
 let chartElement;

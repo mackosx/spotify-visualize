@@ -72,7 +72,7 @@ router.get("/callback", (req, response) => {
           access_token: access_token,
           refresh_token: refresh_token,
         });
-        response.redirect("/#" + params.toString());
+        response.redirect("/charts.html#" + params.toString());
       })
       .catch((err) => console.log(err));
   }
